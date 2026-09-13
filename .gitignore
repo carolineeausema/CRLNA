@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# raw camera-roll originals, not served by the site
+/media-originals
+
 # debug
 npm-debug.log*
 yarn-debug.log*
