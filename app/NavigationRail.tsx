@@ -63,7 +63,7 @@ export function NavigationRail({ disabled = false }: { disabled?: boolean }) {
       <div className="nav-track" aria-hidden="true">
         <span className="nav-track-fill" style={{ width: `${progress}%` }} />
         <span className="nav-marker" style={{ left: `${progress}%` }} />
-        {positions.map((position) => <span className="nav-tick" style={{ left: `${position}%` }} key={position} />)}
+        {positions.map((position, index) => <span className="nav-tick" style={{ left: `${position}%` }} key={index} />)}
       </div>
       <div className="nav-labels">
         {sections.map((section, index) => (

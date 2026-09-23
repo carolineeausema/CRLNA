@@ -5,6 +5,38 @@ export type Diagram = {
   chart: string;
 };
 
+export type ComplianceStatus = "current" | "flagged" | "review";
+
+export type ComplianceControl = {
+  id: string;
+  code: string;
+  title: string;
+  status: ComplianceStatus;
+};
+
+export type ComplianceOutcome = {
+  id: string;
+  doc: string;
+  status: ComplianceStatus;
+  detail: string;
+  controlIds: string[];
+};
+
+export type ComplianceDomain = {
+  id: string;
+  name: string;
+  shortName: string;
+  summary: string;
+  controls: ComplianceControl[];
+  outcomes: ComplianceOutcome[];
+};
+
+export type ComplianceExplorerData = {
+  intro?: string;
+  domains: ComplianceDomain[];
+  defaultActiveIds?: string[];
+};
+
 export type Project = {
   slug: string;
   year: string;
@@ -25,8 +57,10 @@ export type Project = {
   different: string;
   confidentialityNote?: string;
   diagrams?: Diagram[];
+  complianceExplorer?: ComplianceExplorerData;
   link?: string;
   heroImage?: string;
+  embedUrl?: string;
   detailShots?: DetailShot[];
   differentImage?: string;
 };
@@ -145,7 +179,7 @@ const projectsData: Project[] = [
     oneLiner: "A tool that keeps compliance monitoring current and searchable, built first against the NIST CSF 2.0 framework and designed to expand to other regulatory frameworks over time.",
     statLabel: "Status",
     stat: "Shipped",
-    role: "Software Engineer",
+    role: "Software Engineer, full stack",
     team: "Deloitte, Cyber AI team",
     problem: "Large documentation corpora change constantly, and compliance teams needed a way to monitor them against an initial cybersecurity framework, NIST CSF 2.0, in a system that could grow to support other frameworks later without being rebuilt.",
     work: "I worked as a software engineer on a product team, delivering end to end features across the front end and back end, fixing bugs, reviewing pull requests, and pushing rapid UI updates to keep pace with evolving data models while keeping the interface stable. I led quality and modernization efforts, including a migration to Amazon S3, SonarQube-driven code improvements, and front end unit testing up to about 85% coverage. I also implemented and validated UAT feedback through to release.",
@@ -155,38 +189,83 @@ const projectsData: Project[] = [
       { src: "/work/pathfinder-01-overview.png", label: "Compliance monitoring overview" },
       { src: "/work/pathfinder-02-intake.png", label: "Document intake" },
     ],
-    diagrams: [
-      {
-        title: "NIST CSF 2.0 compliance monitoring flow",
-        chart: `flowchart LR
-    A[Client documentation corpus] --> B[AI parsing layer]
-    B --> C{Is this doc current?}
-    C -->|Yes| D[No action needed]
-    C -->|No / stale| E[Flagged for update]
-
-    B --> F[Tailored monitoring rules]
-    F --> G{Client regulatory domain}
-    G --> H[Domain-specific compliance checks]
-
-    E --> I[Compliance team notified]
-    H --> I
-    I --> J[Client stays audit-ready]
-
-    style E fill:#e2e4e6,stroke:#c8522a,color:#1b1d1f
-    style J fill:#b5b89a,stroke:#8a8c72,color:#1b1d1f`,
-      },
-      {
-        title: "Architecture-level view (my focus area)",
-        chart: `flowchart TB
-    UI[Frontend — Next.js] --> API[Backend — Python / AWS]
-    API --> AI[AI parsing / flagging engine]
-
-    subgraph "My focus area"
-    UI
-    API
-    end`,
-      },
-    ],
+    complianceExplorer: {
+      intro: "This is a simulation built for this portfolio, not the live product. NIST CSF 2.0 was the framework Pathfinder actually shipped against. SOC 2, CIS, and PCI DSS are invented examples showing how the same monitoring pattern could extend to a new regulatory domain without a rebuild.",
+      defaultActiveIds: ["nist-csf"],
+      domains: [
+        {
+          id: "nist-csf",
+          name: "NIST CSF 2.0",
+          shortName: "NIST CSF 2.0",
+          summary: "The actual framework Pathfinder shipped against first, organized around the Govern, Identify, Protect, Detect, and Respond functions.",
+          controls: [
+            { id: "gv-po-01", code: "GV.PO-01", title: "Cybersecurity policy is established and communicated", status: "current" },
+            { id: "id-am-01", code: "ID.AM-01", title: "Hardware inventory is maintained", status: "current" },
+            { id: "pr-aa-01", code: "PR.AA-01", title: "Identities and credentials are managed", status: "flagged" },
+            { id: "de-cm-01", code: "DE.CM-01", title: "Networks are monitored for anomalous events", status: "flagged" },
+            { id: "rs-co-02", code: "RS.CO-02", title: "Incidents are reported per established criteria", status: "review" },
+          ],
+          outcomes: [
+            { id: "nist-o1", doc: "Cybersecurity Policy Handbook", status: "current", detail: "Published this cycle and distributed to all staff.", controlIds: ["gv-po-01"] },
+            { id: "nist-o2", doc: "Asset Inventory Export", status: "current", detail: "Synced from the CMDB this week — matches current hardware inventory.", controlIds: ["id-am-01"] },
+            { id: "nist-o3", doc: "Access Control Policy v3.2", status: "flagged", detail: "References an identity provider retired last quarter, flagged for update.", controlIds: ["pr-aa-01"] },
+            { id: "nist-o4", doc: "Network Monitoring Runbook", status: "flagged", detail: "Last reviewed 187 days ago. Outside the 90-day monitoring window.", controlIds: ["de-cm-01"] },
+            { id: "nist-o5", doc: "Incident Response Plan", status: "review", detail: "Escalation contacts changed after a reorg  routed for compliance review.", controlIds: ["rs-co-02"] },
+          ],
+        },
+        {
+          id: "soc2",
+          name: "SOC 2",
+          shortName: "SOC 2",
+          summary: "Example domain. Trust Services Criteria around security, availability, and governance.",
+          controls: [
+            { id: "cc1-2", code: "CC1.2", title: "Board oversight of internal control", status: "current" },
+            { id: "cc6-1", code: "CC6.1", title: "Logical access restricts unauthorized users", status: "flagged" },
+            { id: "cc7-2", code: "CC7.2", title: "System monitoring detects anomalies", status: "current" },
+            { id: "a1-2", code: "A1.2", title: "Environmental protections support availability", status: "review" },
+          ],
+          outcomes: [
+            { id: "soc2-o1", doc: "Board Governance Minutes", status: "current", detail: "Quarterly review of controls documented and signed off.", controlIds: ["cc1-2"] },
+            { id: "soc2-o2", doc: "Q3 Access Review Log", status: "flagged", detail: "Two service accounts are still active past their offboarding date.", controlIds: ["cc6-1"] },
+            { id: "soc2-o3", doc: "Uptime & Incident Report", status: "review", detail: "Backup generator test is overdue by 12 days, routed for review.", controlIds: ["a1-2"] },
+          ],
+        },
+        {
+          id: "cis",
+          name: "CIS Controls v8",
+          shortName: "CIS Controls",
+          summary: "Example domain. Prioritized safeguards for asset, account, and recovery hygiene.",
+          controls: [
+            { id: "cis-1", code: "CIS 1", title: "Inventory and control of enterprise assets", status: "current" },
+            { id: "cis-5", code: "CIS 5", title: "Account management", status: "flagged" },
+            { id: "cis-8", code: "CIS 8", title: "Audit log management", status: "current" },
+            { id: "cis-11", code: "CIS 11", title: "Data recovery", status: "review" },
+          ],
+          outcomes: [
+            { id: "cis-o1", doc: "Enterprise Asset Inventory", status: "current", detail: "All endpoints reconciled against the asset register this week.", controlIds: ["cis-1"] },
+            { id: "cis-o2", doc: "Privileged Account Review", status: "flagged", detail: "Three admin accounts lack MFA enforcement.", controlIds: ["cis-5"] },
+            { id: "cis-o3", doc: "Backup Verification Log", status: "review", detail: "Last successful restore test was 61 days ago, nearing the 90-day threshold.", controlIds: ["cis-11"] },
+          ],
+        },
+        {
+          id: "pci-dss",
+          name: "PCI DSS",
+          shortName: "PCI DSS",
+          summary: "Example domain. Controls for protecting stored cardholder data and the systems around it.",
+          controls: [
+            { id: "req-3", code: "Req 3", title: "Protect stored cardholder data", status: "current" },
+            { id: "req-6", code: "Req 6", title: "Develop and maintain secure systems", status: "flagged" },
+            { id: "req-10", code: "Req 10", title: "Log and monitor all access", status: "current" },
+            { id: "req-11", code: "Req 11", title: "Regularly test security systems", status: "review" },
+          ],
+          outcomes: [
+            { id: "pci-o1", doc: "Encryption Key Rotation Log", status: "current", detail: "Keys rotated on schedule. Last rotation 14 days ago.", controlIds: ["req-3"] },
+            { id: "pci-o2", doc: "Secure Development Checklist", status: "flagged", detail: "Latest release shipped without a recorded code review sign-off.", controlIds: ["req-6"] },
+            { id: "pci-o3", doc: "Penetration Test Report", status: "review", detail: "Annual test is due within 30 days, routed for scheduling.", controlIds: ["req-11"] },
+          ],
+        },
+      ],
+    },
   },
   {
     slug: "state-child-welfare",
@@ -330,7 +409,7 @@ const projectsData: Project[] = [
     problem: "Transit planning stays opaque to the communities it affects most. In the US, [700,000+ zero-vehicle households](https://www.brookings.edu/research/transit-access-and-zero-vehicle-households/) in major metros lack reliable transit access, [43% of transit-dependent residents](https://digitalcommons.usf.edu/cgi/viewcontent.cgi?article=1054&context=jpt) in major cities live in what amount to transit deserts, and [6.2% of adults](https://meps.ahrq.gov/data_files/publications/st558/stat558.shtml) report missing work or appointments due to unreliable transit. Residents don't have an easy way to understand or influence local transit changes.",
     work: "Designed and built a proof-of-concept platform illustrating what transit equity planning could look like: an interactive transit map, a mocked-up \"what if\" simulator showing how commute times, reachability, and emissions would shift if a route changed, and exportable equity visualizations designed for grant proposals and community outreach. I researched and identified the real data sources a functional version would draw on, including GTFS feeds, Census ACS, LODES, BLS, and TIGER/Line, and used one scenario, a South Sacramento student's commute to Sacramento State, to illustrate the kind of impact the tool is meant to surface: a hypothetical cross-town connector dropping a 70-minute commute to 45, with a simulated 35% increase in reachable opportunity.",
     different: "This was built as a proof of concept, not a functioning tool, so the map and simulator illustrate the idea rather than run on live data. The next real step would be grounding it in one city's actual GTFS feed and census data, and validating the approach with a real planning agency before building further.",
-    heroImage: "/work/city-circuit-figma-planning.png",
+    embedUrl: "https://citycircuit.vercel.app/",
     link: "https://citycircuit.vercel.app/",
   },
 ];

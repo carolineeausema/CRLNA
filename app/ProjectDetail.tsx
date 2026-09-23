@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MermaidDiagram } from "./MermaidDiagram";
+import { ComplianceExplorer } from "./ComplianceExplorer";
 import { projects } from "./data";
 
 function withInlineLinks(text: string) {
@@ -27,7 +28,21 @@ export function ProjectDetail({ slug }: { slug: string }) {
     {project.confidentialityNote ? (
       <div className="case-study-note">
         <p className="confidentiality-note">{project.confidentialityNote}</p>
-        {project.diagrams?.map((diagram) => <MermaidDiagram key={diagram.title ?? diagram.chart} chart={diagram.chart} caption={diagram.title} />)}
+        {project.complianceExplorer ? (
+          <ComplianceExplorer data={project.complianceExplorer} />
+        ) : (
+          project.diagrams?.map((diagram) => <MermaidDiagram key={diagram.title ?? diagram.chart} chart={diagram.chart} caption={diagram.title} />)
+        )}
+      </div>
+    ) : project.embedUrl ? (
+      <div className="detail-hero detail-hero-embed">
+        <div className="embed-chrome">
+          <span className="embed-dot" aria-hidden="true" />
+          <span className="embed-dot" aria-hidden="true" />
+          <span className="embed-dot" aria-hidden="true" />
+          <span className="embed-url">{project.embedUrl.replace(/^https?:\/\//, "")}</span>
+        </div>
+        <iframe className="embed-frame" src={project.embedUrl} title={`${project.title} — live site`} loading="lazy" />
       </div>
     ) : project.heroImage ? (
       <div className="detail-hero detail-hero-photo"><img src={encodeURI(project.heroImage)} alt={project.title} /></div>
@@ -36,13 +51,18 @@ export function ProjectDetail({ slug }: { slug: string }) {
     )}
     <section className="prose-grid"><div><p className="eyebrow">The problem</p><p>{withInlineLinks(project.problem)}</p></div><div><p className="eyebrow">What I did</p><p>{project.work}</p></div></section>
     {project.detailShots && (
-      <div className="detail-shots">
-        {project.detailShots.map((shot) => (
-          <figure className={`detail-shot-figure${project.detailShots!.length === 1 ? " detail-shot-figure-full" : ""}`} key={shot.src}>
-            <img className="detail-shot" src={encodeURI(shot.src)} alt={shot.label} />
-            <figcaption>{shot.label}</figcaption>
-          </figure>
-        ))}
+      <div className={`detail-shots-wrap${project.confidentialityNote ? " is-mockup" : ""}`}>
+        <div className="detail-shots">
+          {project.detailShots.map((shot) => {
+            const label = project.confidentialityNote ? `${shot.label} Mockup` : shot.label;
+            return (
+              <figure className={`detail-shot-figure${project.detailShots!.length === 1 ? " detail-shot-figure-full" : ""}`} key={shot.src}>
+                <img className="detail-shot" src={encodeURI(shot.src)} alt={label} />
+                <figcaption>{label}</figcaption>
+              </figure>
+            );
+          })}
+        </div>
       </div>
     )}
     {project.differentImage ? (

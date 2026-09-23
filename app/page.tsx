@@ -17,8 +17,10 @@ const heroContent = {
   eyebrow: "Product Design & Engineering",
   title: "Strategy + Design\nin critical spaces",
   description: "Where design decisions become code.",
-  about:
+  about: [
     "I came to product design by way of sociology: studying computer science with the same curiosity about why systems work the way they do, aimed at something I could actually build. I think about infrastructure a lot: it's invisible until it breaks. My job is usually to notice the quiet failure point before anyone else does. Staying curious, open, and sensitive to problems that aren't mine is what makes that possible.",
+    "I'm currently a Doblin GPS Innovation Fellow, a year-long program pipelining junior practitioners into public-sector innovation work, where I'm developing an eminence piece through Deloitte's Center for Government Insights.",
+  ],
 };
 
 const contactContent = {
@@ -183,7 +185,7 @@ function AboutSection() {
         <h2>About</h2>
         <p>Design thinking, engineering judgment, and the journey as the destination.</p>
       </div>
-      <div className="about-copy">{heroContent.about}</div>
+      <div className="about-copy">{heroContent.about.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
     </section>
   );
 }
@@ -271,10 +273,8 @@ function ContactSection() {
     <section className="contact-section" id="contact">
       <div className="contact-poster">
         <h2>{contactContent.title}</h2>
-        <div className="contact-poster-aside">
-          <p>{contactContent.description}</p>
-          <p className="contact-status">{contactContent.status}</p>
-        </div>
+        <p>{contactContent.description}</p>
+        <p className="contact-status">{contactContent.status}</p>
       </div>
 
       <div className="contact-body">
@@ -341,7 +341,7 @@ function ContactSection() {
             {status === "sending" ? "Sending..." : "Send ->"}
           </button>
 
-          {status === "sent" && <p className="form-status form-status-success">Message sent — I&apos;ll reply within a day or two.</p>}
+          {status === "sent" && <p className="form-status form-status-success">Message sent :) I&apos;ll reply within a day or two.</p>}
           {status === "error" && <p className="form-status form-status-error">Something went wrong. Try again, or email me directly.</p>}
         </form>
       </div>
@@ -353,7 +353,7 @@ function Footer() {
   return (
     <footer>
       <span>© 2026 CRLNA / React / Next / TypeScript / p5</span>
-      <Link className="footer-easter-egg" href="/quests">p.s. these r my side quests →</Link>
+      <Link className="footer-easter-egg" href="/quests">p.s. these r side quests →</Link>
       <span>Built with a little sparkle in my eye.</span>
     </footer>
   );
