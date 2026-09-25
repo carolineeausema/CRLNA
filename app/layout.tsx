@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
-import { Archivo } from "next/font/google";
+import { Hanken_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const archivo = Archivo({
+const hanken = Hanken_Grotesk({
   subsets: ["latin"],
-  axes: ["wdth"],
-  variable: "--font-archivo",
+  weight: ["400", "500", "600"],
+  variable: "--font-hanken",
+  display: "swap",
+});
+
+const grovana = localFont({
+  src: "./fonts/Grovana-Medium-Rough.otf",
+  variable: "--font-grovana",
   display: "swap",
 });
 
@@ -16,6 +23,6 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={archivo.variable}><body>{children}</body></html>
+    <html lang="en" className={`${hanken.variable} ${grovana.variable}`}><body>{children}</body></html>
   );
 }

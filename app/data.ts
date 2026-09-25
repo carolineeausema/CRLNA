@@ -1,40 +1,10 @@
-export type Track = "Engineering" | "Design" | "Creative";
+export type Track = "Engineering" | "Design";
 
-export type Diagram = {
-  title?: string;
-  chart: string;
-};
-
-export type ComplianceStatus = "current" | "flagged" | "review";
-
-export type ComplianceControl = {
-  id: string;
-  code: string;
-  title: string;
-  status: ComplianceStatus;
-};
-
-export type ComplianceOutcome = {
-  id: string;
-  doc: string;
-  status: ComplianceStatus;
-  detail: string;
-  controlIds: string[];
-};
-
-export type ComplianceDomain = {
-  id: string;
-  name: string;
-  shortName: string;
-  summary: string;
-  controls: ComplianceControl[];
-  outcomes: ComplianceOutcome[];
-};
-
-export type ComplianceExplorerData = {
-  intro?: string;
-  domains: ComplianceDomain[];
-  defaultActiveIds?: string[];
+export type MediaItem = {
+  img?: string;
+  code?: string;
+  caption: string;
+  photo?: boolean;
 };
 
 export type Project = {
@@ -56,48 +26,159 @@ export type Project = {
   work: string;
   different: string;
   confidentialityNote?: string;
-  diagrams?: Diagram[];
-  complianceExplorer?: ComplianceExplorerData;
-  link?: string;
-  heroImage?: string;
   embedUrl?: string;
-  detailShots?: DetailShot[];
-  differentImage?: string;
+  media?: MediaItem[];
 };
 
-export type DetailShot = {
-  src: string;
-  label: string;
-};
-
-export type Fact = {
-  label: string;
-  value: string;
-};
+export type QuestLink = { label: string; href: string };
 
 export type Quest = {
+  slug: string;
   status: string;
   date: string;
   title: string;
   domain: string;
   body: string;
-  label: string;
-  caption?: string;
-  link?: string;
-  links?: { label: string; href: string; type: "press" | "process" }[];
-  photo: string;
-  facts: Fact[];
+  links?: QuestLink[];
 };
 
-function dateSortValue(date: string) {
-  if (/ongoing/i.test(date)) return Infinity;
-  const match = date.match(/\d{4}/);
-  return match ? Number(match[0]) : 0;
-}
+export const availability = "Currently: full-time at Deloitte, open to conversations about what's next.";
 
-export const availability = "Open to new roles";
+const MEDIA: Record<string, MediaItem[]> = {
+  "state-child-welfare": [
+    { img: "/work/referral-journey-map.png", caption: "Referral journey map: current path and the new community-response path" },
+    {
+      code: `flowchart LR
+    A[Report initiated] --> B{Reporting channel}
+    B --> C[Hotline]
+    B --> D[Self-service portal]
+    C --> E[Hotline worker conducts intake call]
+    D --> E
+    E --> F[Identify individuals and roles]
+    E --> G[Collect situation narrative]
+    F --> H{Case designation}
+    G --> H
+    H --> I[CPS case]
+    H --> J[GPS case]
+    H --> K[Community response case]
+    I --> L[Allegations added per alleged perpetrator]
+    J --> L
+    L --> M[Referral submitted and transmitted]
+    M --> N[Case enters child welfare system for CPS / GPS casework]
+    K --> O[Routed to county well-being unit]
+    O --> P[Unit contacts family and child]
+    P --> Q[Conduct assessment / needs determination]
+    Q --> R[Warm handoff to community services]
+    R --> S[Family supported with community resources]
+    subgraph newpath ["New in this redesign"]
+    K
+    O
+    P
+    Q
+    R
+    S
+    end`,
+      caption: "Referral journey: hotline to community resource",
+    },
+  ],
+  "federal-account": [
+    { img: "/work/fed-01-dashboard.png", caption: "Illustrative account dashboard" },
+    {
+      code: `flowchart LR
+    A[Business owner needs tax info] --> B{Old process}
+    B --> C[Phone call to agency]
+    B --> D[Physical mail request]
+    C --> E[Long wait / limited hours]
+    D --> F[Days to weeks delay]
+    LEGACY[(Legacy backend: C / COBOL mainframe systems)] -.-> C
+    LEGACY -.-> D
+    A --> G{New process}
+    G --> H[Secure digital account]
+    H --> I[Self-serve access to tax records]
+    I --> J[Business gets answer in minutes]
+    H -.must remain compatible with.-> LEGACY
+    I -.must remain compatible with.-> LEGACY`,
+      caption: "User flow: old process vs. secure digital access",
+    },
+    {
+      code: `flowchart LR
+    A[Request Type] --> B{Entity type}
+    B --> C[Partnership]
+    B --> D[Exempt organization]
+    B --> E[Government entity]
+    C --> F[Call entity-specific API]
+    D --> F
+    E --> F
+    F --> G{Return code}
+    G -->|200| H[Transaction logged as successful]
+    G -->|Error| I[Trace originating API]
+    I --> J[Determine whether call originated from Request PIN or Confirm PIN]
+    H --> K[Status tracked for cross-team visibility]
+    J --> K
+    subgraph focus ["My focus area"]
+    F
+    G
+    H
+    I
+    J
+    K
+    end`,
+      caption: "Transaction logic by entity type (my focus area)",
+    },
+    { img: "/work/fed-02-architecture.png", caption: "Illustrative architecture" },
+  ],
+  pathfinder: [
+    { img: "/work/pathfinder-01-overview.png", caption: "Illustrative compliance overview" },
+    { img: "/work/pathfinder-02-intake.png", caption: "Illustrative document intake" },
+  ],
+  "distributed-energy-interconnection": [
+    {
+      code: `flowchart LR
+    A[Applicant submits interconnection request] --> B[Utility intake / initial review]
+    B --> C{Passes initial screening?}
+    C -->|No| D[Returned with required changes]
+    D --> B
+    C -->|Yes| E[Technical impact screening]
+    E --> F{Requires broader grid study?}
+    F -->|No| G[Utility approval]
+    F -->|Yes| H[Coordination with ISO / transmission layer]
+    H --> I[Impact study]
+    I --> G
+    G --> J[Interconnection agreement issued]
+    J --> K[Project cleared to proceed]
+    style G fill:#BBA674,stroke:#8A765B,color:#372621
+    style J fill:#BBA674,stroke:#8A765B,color:#372621
+    style K fill:#BBA674,stroke:#8A765B,color:#372621`,
+      caption: "Interconnection application flow",
+    },
+    { img: "/work/west-monroe.jpg", caption: "West Monroe, Chicago", photo: true },
+  ],
+  "critical-cyber-asset-compliance": [
+    { img: "/work/miso-intern.jpg", caption: "MISO Energy internship", photo: true },
+  ],
+};
 
-const projectsData: Project[] = [
+const projectsBase: Omit<Project, "media">[] = [
+  {
+    slug: "state-child-welfare",
+    year: "2026",
+    org: "Deloitte",
+    track: "Design",
+    title: "State Child Welfare Referral System",
+    description: "UX research and product design for a closed-loop referral system connecting families to community care",
+    stack: "Product design / Systems design / User Research",
+    impact: "Statewide",
+    eyebrow: "Deloitte / UX Researcher & Systems Designer / Design",
+    oneLiner: "A closed-loop referral system designed so families who don't meet the threshold for a child abuse case still get connected to the community resources they actually need, with the loop closed so those connections can be tracked.",
+    statLabel: "Reach",
+    stat: "Statewide",
+    role: "UX Researcher & Systems Designer, Product Management",
+    team: "Cross-functional public-sector team, with systems architecture work contributed through a multi-state referral consortium",
+    problem: "Many families who contact the child welfare system don't meet the threshold for a child abuse case, but still need help. The existing process had no reliable way to connect them to community resources or to track whether that connection actually happened.",
+    work: "I conducted user experience research on child welfare processes, including journey maps and personas, and rapidly prototyped concepts for multiple pilots. I authored and maintained the research documentation and prepared visual stories to support stakeholder review. I contributed to systems architecture design for the closed-loop referral system as part of a multi-state consortium work stream, developing prototypes with applicability beyond this state alone. I also supported preparation for a state executive lab by shaping the technical and logistical details needed for rapid prototyping, and translated research findings into structured, sprint-ready user stories across multiple workstreams and epics, keeping sprint planning aligned with what the research actually found.",
+    different: "I would bring more frontline voices into the earliest systems conversations. The strongest decisions came from direct experience with hotline callers and case workers, and they deserved even more influence from the start.",
+    confidentialityNote: "Built under state client confidentiality. Shown here through description and an illustrative flow diagram rather than the actual product or internal systems involved.",
+  },
   {
     slug: "federal-account",
     year: "2025",
@@ -117,54 +198,6 @@ const projectsData: Project[] = [
     work: "I designed and documented client releases through user flows, sequence diagrams, API specifications, and architecture diagrams. I mapped the logic behind different transaction types, like generating and confirming PINs, across business entity categories such as partnerships, exempt organizations, and government entities, each pulling from its own API, and used return codes to trace what had actually happened in a transaction when something failed. I also facilitated team meetings and wrote weekly, biweekly, and monthly status reports to keep a program of thousands of practitioners aligned with stakeholder reporting requirements.",
     different: "The gap between what was compliant and what was actually usable didn't show up until later than it should have. That kind of gap is easier to notice from outside the room than from inside the discussions I was documenting. Earlier user testing with actual small business owners, not just internal stakeholders, would have caught it sooner.",
     confidentialityNote: "Built under federal client confidentiality. Shown here through description and illustrative diagrams, not the actual interface or government systems involved.",
-    diagrams: [
-      {
-        title: "User flow",
-        chart: `flowchart LR
-    A[Business owner needs tax info] --> B{Old process}
-    B --> C[Phone call to agency]
-    B --> D[Physical mail request]
-    C --> E[Long wait / limited hours]
-    D --> F[Days to weeks delay]
-
-    LEGACY[(Legacy backend: C / COBOL mainframe systems)] -.-> C
-    LEGACY -.-> D
-
-    A --> G{New process}
-    G --> H[Secure digital account]
-    H --> I[Self-serve access to tax records]
-    I --> J[Business gets answer in minutes]
-
-    H -.must remain compatible with.-> LEGACY
-    I -.must remain compatible with.-> LEGACY`,
-      },
-      {
-        title: "Sequence diagram: transaction logic (my focus area)",
-        chart: `flowchart LR
-    A[Request Type] --> B{Entity type}
-    B --> C[Partnership]
-    B --> D[Exempt organization]
-    B --> E[Government entity]
-    C --> F[Call entity-specific API]
-    D --> F
-    E --> F
-    F --> G{Return code}
-    G -->|200| H[Transaction logged as successful]
-    G -->|Error| I[Trace originating API]
-    I --> J[Determine whether call originated from Request PIN or Confirm PIN]
-    H --> K[Status tracked for cross-team visibility]
-    J --> K
-
-    subgraph "My focus area"
-    F
-    G
-    H
-    I
-    J
-    K
-    end`,
-      },
-    ],
   },
   {
     slug: "pathfinder",
@@ -185,211 +218,6 @@ const projectsData: Project[] = [
     work: "I worked as a software engineer on a product team, delivering end to end features across the front end and back end, fixing bugs, reviewing pull requests, and pushing rapid UI updates to keep pace with evolving data models while keeping the interface stable. I led quality and modernization efforts, including a migration to Amazon S3, SonarQube-driven code improvements, and front end unit testing up to about 85% coverage. I also implemented and validated UAT feedback through to release.",
     different: "I would establish a stronger evaluation set before expanding the monitoring surface. The product got useful quickly, and its quality bar should have been made explicit sooner. I would also get a UX/UI designer involved earlier. The product was useful, but it could have been more usable.",
     confidentialityNote: "Built under client confidentiality. Shown here through description and illustrative UI and flow visuals rather than the actual product or client data.",
-    detailShots: [
-      { src: "/work/pathfinder-01-overview.png", label: "Compliance monitoring overview" },
-      { src: "/work/pathfinder-02-intake.png", label: "Document intake" },
-    ],
-    complianceExplorer: {
-      intro: "This is a simulation built for this portfolio, not the live product. NIST CSF 2.0 was the framework Pathfinder actually shipped against. SOC 2, CIS, and PCI DSS are invented examples showing how the same monitoring pattern could extend to a new regulatory domain without a rebuild.",
-      defaultActiveIds: ["nist-csf"],
-      domains: [
-        {
-          id: "nist-csf",
-          name: "NIST CSF 2.0",
-          shortName: "NIST CSF 2.0",
-          summary: "The actual framework Pathfinder shipped against first, organized around the Govern, Identify, Protect, Detect, and Respond functions.",
-          controls: [
-            { id: "gv-po-01", code: "GV.PO-01", title: "Cybersecurity policy is established and communicated", status: "current" },
-            { id: "id-am-01", code: "ID.AM-01", title: "Hardware inventory is maintained", status: "current" },
-            { id: "pr-aa-01", code: "PR.AA-01", title: "Identities and credentials are managed", status: "flagged" },
-            { id: "de-cm-01", code: "DE.CM-01", title: "Networks are monitored for anomalous events", status: "flagged" },
-            { id: "rs-co-02", code: "RS.CO-02", title: "Incidents are reported per established criteria", status: "review" },
-          ],
-          outcomes: [
-            { id: "nist-o1", doc: "Cybersecurity Policy Handbook", status: "current", detail: "Published this cycle and distributed to all staff.", controlIds: ["gv-po-01"] },
-            { id: "nist-o2", doc: "Asset Inventory Export", status: "current", detail: "Synced from the CMDB this week — matches current hardware inventory.", controlIds: ["id-am-01"] },
-            { id: "nist-o3", doc: "Access Control Policy v3.2", status: "flagged", detail: "References an identity provider retired last quarter, flagged for update.", controlIds: ["pr-aa-01"] },
-            { id: "nist-o4", doc: "Network Monitoring Runbook", status: "flagged", detail: "Last reviewed 187 days ago. Outside the 90-day monitoring window.", controlIds: ["de-cm-01"] },
-            { id: "nist-o5", doc: "Incident Response Plan", status: "review", detail: "Escalation contacts changed after a reorg  routed for compliance review.", controlIds: ["rs-co-02"] },
-          ],
-        },
-        {
-          id: "soc2",
-          name: "SOC 2",
-          shortName: "SOC 2",
-          summary: "Example domain. Trust Services Criteria around security, availability, and governance.",
-          controls: [
-            { id: "cc1-2", code: "CC1.2", title: "Board oversight of internal control", status: "current" },
-            { id: "cc6-1", code: "CC6.1", title: "Logical access restricts unauthorized users", status: "flagged" },
-            { id: "cc7-2", code: "CC7.2", title: "System monitoring detects anomalies", status: "current" },
-            { id: "a1-2", code: "A1.2", title: "Environmental protections support availability", status: "review" },
-          ],
-          outcomes: [
-            { id: "soc2-o1", doc: "Board Governance Minutes", status: "current", detail: "Quarterly review of controls documented and signed off.", controlIds: ["cc1-2"] },
-            { id: "soc2-o2", doc: "Q3 Access Review Log", status: "flagged", detail: "Two service accounts are still active past their offboarding date.", controlIds: ["cc6-1"] },
-            { id: "soc2-o3", doc: "Uptime & Incident Report", status: "review", detail: "Backup generator test is overdue by 12 days, routed for review.", controlIds: ["a1-2"] },
-          ],
-        },
-        {
-          id: "cis",
-          name: "CIS Controls v8",
-          shortName: "CIS Controls",
-          summary: "Example domain. Prioritized safeguards for asset, account, and recovery hygiene.",
-          controls: [
-            { id: "cis-1", code: "CIS 1", title: "Inventory and control of enterprise assets", status: "current" },
-            { id: "cis-5", code: "CIS 5", title: "Account management", status: "flagged" },
-            { id: "cis-8", code: "CIS 8", title: "Audit log management", status: "current" },
-            { id: "cis-11", code: "CIS 11", title: "Data recovery", status: "review" },
-          ],
-          outcomes: [
-            { id: "cis-o1", doc: "Enterprise Asset Inventory", status: "current", detail: "All endpoints reconciled against the asset register this week.", controlIds: ["cis-1"] },
-            { id: "cis-o2", doc: "Privileged Account Review", status: "flagged", detail: "Three admin accounts lack MFA enforcement.", controlIds: ["cis-5"] },
-            { id: "cis-o3", doc: "Backup Verification Log", status: "review", detail: "Last successful restore test was 61 days ago, nearing the 90-day threshold.", controlIds: ["cis-11"] },
-          ],
-        },
-        {
-          id: "pci-dss",
-          name: "PCI DSS",
-          shortName: "PCI DSS",
-          summary: "Example domain. Controls for protecting stored cardholder data and the systems around it.",
-          controls: [
-            { id: "req-3", code: "Req 3", title: "Protect stored cardholder data", status: "current" },
-            { id: "req-6", code: "Req 6", title: "Develop and maintain secure systems", status: "flagged" },
-            { id: "req-10", code: "Req 10", title: "Log and monitor all access", status: "current" },
-            { id: "req-11", code: "Req 11", title: "Regularly test security systems", status: "review" },
-          ],
-          outcomes: [
-            { id: "pci-o1", doc: "Encryption Key Rotation Log", status: "current", detail: "Keys rotated on schedule. Last rotation 14 days ago.", controlIds: ["req-3"] },
-            { id: "pci-o2", doc: "Secure Development Checklist", status: "flagged", detail: "Latest release shipped without a recorded code review sign-off.", controlIds: ["req-6"] },
-            { id: "pci-o3", doc: "Penetration Test Report", status: "review", detail: "Annual test is due within 30 days, routed for scheduling.", controlIds: ["req-11"] },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    slug: "state-child-welfare",
-    year: "2026",
-    org: "Deloitte",
-    track: "Design",
-    title: "State Child Welfare Referral System",
-    description: "UX research and product design for a closed-loop referral system connecting families to community care",
-    stack: "Product design / Systems design / User Research",
-    impact: "Statewide",
-    eyebrow: "Deloitte / UX Researcher & Systems Designer / Design",
-    oneLiner: "A closed-loop referral system designed so families who don't meet the threshold for a child abuse case still get connected to the community resources they actually need, with the loop closed so those connections can be tracked.",
-    statLabel: "Reach",
-    stat: "Statewide",
-    role: "UX Researcher & Systems Designer, Product Management",
-    team: "Cross-functional public-sector team, with systems architecture work contributed through a multi-state referral consortium",
-    problem: "Many families who contact the child welfare system don't meet the threshold for a child abuse case, but still need help. The existing process had no reliable way to connect them to community resources or to track whether that connection actually happened.",
-    work: "I conducted user experience research on child welfare processes, including journey maps and personas, and rapidly prototyped concepts for multiple pilots. I authored and maintained the research documentation and prepared visual stories to support stakeholder review. I contributed to systems architecture design for the closed-loop referral system as part of a multi-state consortium work stream, developing prototypes with applicability beyond this state alone. I also supported preparation for a state executive lab by shaping the technical and logistical details needed for rapid prototyping, and translated research findings into structured, sprint-ready user stories across multiple workstreams and epics, keeping sprint planning aligned with what the research actually found.",
-    different: "I would bring more frontline voices into the earliest systems conversations. The strongest decisions came from direct experience with hotline callers and case workers, and they deserved even more influence from the start.",
-    confidentialityNote: "Built under state client confidentiality. Shown here through description and an illustrative flow diagram rather than the actual product or internal systems involved.",
-    detailShots: [
-      { src: "/work/referral-journey-map.png", label: "Referral journey map" },
-    ],
-    diagrams: [
-      {
-        title: "Referral journey: hotline to community resource",
-        chart: `flowchart LR
-    A[Report initiated] --> B{Reporting channel}
-    B --> C[Hotline]
-    B --> D[Self-service portal]
-    C --> E[Hotline worker conducts intake call]
-    D --> E
-    E --> F[Identify individuals and roles]
-    E --> G[Collect situation narrative]
-    F --> H{Case designation}
-    G --> H
-    H --> I[CPS case]
-    H --> J[GPS case]
-    H --> K[Community response case]
-
-    I --> L[Allegations added per alleged perpetrator]
-    J --> L
-    L --> M[Referral submitted and transmitted]
-    M --> N[Case enters child welfare system for CPS / GPS casework]
-
-    K --> O[Routed to county well-being unit]
-    O --> P[Unit contacts family and child]
-    P --> Q[Conduct assessment / needs determination]
-    Q --> R[Warm handoff to community services]
-    R --> S[Family supported with community resources]
-
-    subgraph "New in this redesign"
-    K
-    O
-    P
-    Q
-    R
-    S
-    end`,
-      },
-    ],
-  },
-  {
-    slug: "distributed-energy-interconnection",
-    year: "2023",
-    org: "West Monroe",
-    track: "Engineering",
-    title: "Public Utility Distributed Energy Interconnection Platform",
-    description: "SaaS product for reviewing distributed energy resources",
-    stack: "Angular / ASP.NET / C# / Azure DevOps",
-    impact: "Shipped",
-    eyebrow: "West Monroe / PXEL Engineering Intern / Engineering",
-    oneLiner: "A web-based SaaS product built with West Monroe's Product Experience & Engineering Lab that streamlined how distributed energy resources, with a specific focus on solar integration, get reviewed and approved for interconnection.",
-    statLabel: "Role",
-    stat: "PXEL",
-    role: "PXEL Engineering Intern",
-    team: "West Monroe's Product Experience & Engineering Lab, working directly with an Energy & Utility client, based in downtown Chicago",
-    problem: "Interconnection review required a clearer way to move from complex project data to the decisions an energy and utility client needed to make, especially as solar applications increased in volume.",
-    work: "I collaborated directly with the client on a web-based SaaS product that optimized and enhanced the interconnection review process for distributed energy resources. I proposed and built dynamic review pages that streamlined how applications were reviewed and managed, giving the people responsible for approvals a more usable workflow.",
-    different: "I was still an intern here, figuring out how to be a developer on a team. I would have asked more questions about the end-user experience, rather than exclusively tackling feature implementation. This was a really interesting product with a lot to learn from.",
-    confidentialityNote: "Built under client confidentiality for an Energy & Utility client. Shown here through description and an illustrative flow diagram rather than the actual product or internal review systems.",
-    differentImage: "/work/west-monroe.jpg",
-    diagrams: [
-      {
-        title: "Interconnection application flow",
-        chart: `flowchart LR
-    A[Applicant submits interconnection request] --> B[Utility intake / initial review]
-    B --> C{Passes initial screening?}
-    C -->|No| D[Returned with required changes]
-    D --> B
-    C -->|Yes| E[Technical impact screening]
-    E --> F{Requires broader grid study?}
-    F -->|No| G[Utility approval]
-    F -->|Yes| H[Coordination with ISO / transmission layer]
-    H --> I[Impact study]
-    I --> G
-    G --> J[Interconnection agreement issued]
-    J --> K[Project cleared to proceed]
-
-    style G fill:#b5b89a,stroke:#8a8c72,color:#1b1d1f
-    style J fill:#b5b89a,stroke:#8a8c72,color:#1b1d1f
-    style K fill:#b5b89a,stroke:#8a8c72,color:#1b1d1f`,
-      },
-    ],
-  },
-  {
-    slug: "critical-cyber-asset-compliance",
-    year: "2022",
-    org: "MISO Energy",
-    track: "Engineering",
-    title: "Critical Cyber Asset Compliance Automation",
-    description: "Full-stack automation for cyber-asset certification",
-    stack: "Angular / Flask / Python / Docker / Jenkins / BlackDuck / Fortify",
-    impact: "15 months",
-    eyebrow: "MISO Energy / Data Analyst Intern / Engineering",
-    oneLiner: "A web application that replaced a 15-month manual certification process, ensuring compliance of confidential cyber assets critical to the bulk electric system.",
-    statLabel: "Replaced",
-    stat: "15 mo",
-    role: "Data Analyst Intern",
-    team: "MISO Energy compliance team",
-    problem: "Manual certification created a long, fragile path to proving that critical cyber assets met the requirements of the bulk electric system.",
-    work: "I automated a manual, 15-month certification process by developing a full-stack web application that ensures compliance of confidential cyber assets critical to the bulk electric system. I built it using Angular, Flask, and Python, with Docker and Jenkins for deployment, and BlackDuck and Fortify for security and dependency scanning in production.",
-    different: "I would involve the eventual operators earlier in the workflow design. The system automated the process, but its everyday ergonomics could have been shaped more directly by the people running it.",
-    heroImage: "/work/miso-intern.jpg",
   },
   {
     slug: "city-circuit",
@@ -410,173 +238,130 @@ const projectsData: Project[] = [
     work: "Designed and built a proof-of-concept platform illustrating what transit equity planning could look like: an interactive transit map, a mocked-up \"what if\" simulator showing how commute times, reachability, and emissions would shift if a route changed, and exportable equity visualizations designed for grant proposals and community outreach. I researched and identified the real data sources a functional version would draw on, including GTFS feeds, Census ACS, LODES, BLS, and TIGER/Line, and used one scenario, a South Sacramento student's commute to Sacramento State, to illustrate the kind of impact the tool is meant to surface: a hypothetical cross-town connector dropping a 70-minute commute to 45, with a simulated 35% increase in reachable opportunity.",
     different: "This was built as a proof of concept, not a functioning tool, so the map and simulator illustrate the idea rather than run on live data. The next real step would be grounding it in one city's actual GTFS feed and census data, and validating the approach with a real planning agency before building further.",
     embedUrl: "https://citycircuit.vercel.app/",
-    link: "https://citycircuit.vercel.app/",
+  },
+  {
+    slug: "distributed-energy-interconnection",
+    year: "2023",
+    org: "West Monroe",
+    track: "Engineering",
+    title: "Public Utility Distributed Energy Interconnection Platform",
+    description: "SaaS product for reviewing distributed energy resources",
+    stack: "Angular / ASP.NET / C# / Azure DevOps",
+    impact: "Shipped",
+    eyebrow: "West Monroe / PXEL Engineering Intern / Engineering",
+    oneLiner: "A web-based SaaS product built with West Monroe's Product Experience & Engineering Lab that streamlined how distributed energy resources, with a specific focus on solar integration, get reviewed and approved for interconnection.",
+    statLabel: "Role",
+    stat: "PXEL",
+    role: "PXEL Engineering Intern",
+    team: "West Monroe's Product Experience & Engineering Lab, working directly with an Energy & Utility client, based in downtown Chicago",
+    problem: "Interconnection review required a clearer way to move from complex project data to the decisions an energy and utility client needed to make, especially as solar applications increased in volume.",
+    work: "I collaborated directly with the client on a web-based SaaS product that optimized and enhanced the interconnection review process for distributed energy resources. I proposed and built dynamic review pages that streamlined how applications were reviewed and managed, giving the people responsible for approvals a more usable workflow.",
+    different: "I was still an intern here, figuring out how to be a developer on a team. I would have asked more questions about the end-user experience, rather than exclusively tackling feature implementation. This was a really interesting product with a lot to learn from.",
+    confidentialityNote: "Built under client confidentiality for an Energy & Utility client. Shown here through description and an illustrative flow diagram rather than the actual product or internal review systems.",
+  },
+  {
+    slug: "critical-cyber-asset-compliance",
+    year: "2022",
+    org: "MISO Energy",
+    track: "Engineering",
+    title: "Critical Cyber Asset Compliance Automation",
+    description: "Full-stack automation for cyber-asset certification",
+    stack: "Angular / Flask / Python / Docker / Jenkins / BlackDuck / Fortify",
+    impact: "15 months",
+    eyebrow: "MISO Energy / Data Analyst Intern / Engineering",
+    oneLiner: "A web application that replaced a 15-month manual certification process, ensuring compliance of confidential cyber assets critical to the bulk electric system.",
+    statLabel: "Replaced",
+    stat: "15 mo",
+    role: "Data Analyst Intern",
+    team: "MISO Energy compliance team",
+    problem: "Manual certification created a long, fragile path to proving that critical cyber assets met the requirements of the bulk electric system.",
+    work: "I automated a manual, 15-month certification process by developing a full-stack web application that ensures compliance of confidential cyber assets critical to the bulk electric system. I built it using Angular, Flask, and Python, with Docker and Jenkins for deployment, and BlackDuck and Fortify for security and dependency scanning in production.",
+    different: "I would involve the eventual operators earlier in the workflow design. The system automated the process, but its everyday ergonomics could have been shaped more directly by the people running it.",
   },
 ];
 
-export const projects = [...projectsData].sort(
-  (a, b) => dateSortValue(b.year) - dateSortValue(a.year)
-);
+export const projects: Project[] = projectsBase.map((p) => ({ ...p, media: MEDIA[p.slug] }));
 
-const questsData: Quest[] = [
+export const quests: Quest[] = [
   {
-    status: "Paused",
-    date: "2020–21",
-    title: "Student pilot",
-    domain: "Aviation",
-    body: "Learned to fly a Piper Warrior II in my Indiana hometown. I love planes, and this was a dream opportunity during late high school and early college.",
-    label: "FLIGHT LOG",
-    caption: "Piper Warrior II, Indiana",
-    photo: "/quests/soloflight.jpg",
-    facts: [
-      { label: "Aircraft", value: "Piper Warrior II" },
-      { label: "Groundschool score", value: "96%" },
-      { label: "Guided hours", value: "150+ hours" },
-      { label: "Solo hours", value: "20+ hours" },
-    ],
-  },
-  {
+    slug: "yoga",
     status: "Certified",
     date: "2026",
     title: "RYT 200 yoga teacher",
     domain: "Movement",
     body: "Occasionally teaching, but always learning and practicing. I love the yoga community I've found in Sacramento, CA.",
-    label: "PRACTICE NOTES",
-    caption: "Practice session",
-    photo: "/quests/yoga1.jpg",
-    facts: [
-      { label: "Credential", value: "RYT 200" },
-      { label: "Training hours", value: "200 hours" },
-      { label: "Studio", value: "—" },
-      { label: "Year", value: "—" },
-    ],
   },
   {
+    slug: "freq",
     status: "Completed",
     date: "2026",
     title: "Freq of Nature Projector Mapping",
     domain: "Light",
     body: "Created visuals for a dancefloor at a Sacramento, CA art collective fundraiser.",
-    label: "DJ VISUALS",
-    caption: "Sacramento art collective fundraiser",
-    links: [
-      { label: "Freq of Nature", href: "https://www.freq0fnature.com/", type: "process" },
-    ],
-    photo: "/quests/freq1.jpg",
-    facts: [
-      { label: "Venue", value: "Sacramento, CA art collective" },
-      { label: "Surface area", value: "—" },
-      { label: "Runtime", value: "—" },
-      { label: "Attendance", value: "—" },
-    ],
+    links: [{ label: "Freq of Nature", href: "https://www.freq0fnature.com/" }],
   },
   {
+    slug: "camp-ukai",
     status: "Completed",
     date: "2026",
     title: "Camp U-Kai Photographer",
     domain: "Photography",
     body: "Camp photographer at a DIY weekend gathering in the mountains of Ukiah, CA.",
-    label: "TEST SHOTS",
-    caption: "Ukiah, CA",
-    link: "https://campukai.com/",
-    photo: "/quests/camp-ukai-003.jpg",
-    facts: [
-      { label: "Location", value: "Ukiah, CA" },
-      { label: "Dates", value: "—" },
-      { label: "Frames delivered", value: "—" },
-    ],
+    links: [{ label: "Camp U-Kai", href: "https://campukai.com/" }],
   },
   {
-    status: "Completed",
-    date: "2023",
-    title: "Printmaking on an 18th century printing press",
-    domain: "Craft",
-    body: "Set type by hand and pulled prints on a centuries-old letterpress.",
-    label: "PRESS PROOFS",
-    caption: "Letterpress proof",
-    photo: "/quests/printmaking.jpg",
-    facts: [
-      { label: "Press", value: "18th century letterpress" },
-      { label: "Technique", value: "Hand-set type" },
-      { label: "Output", value: "—" },
-      { label: "Location", value: "—" },
-    ],
-  },
-  {
-    status: "Completed",
-    date: "2023",
-    title: "Studying globalization in Egypt",
-    domain: "Field",
-    body: "Coursework and fieldwork on globalization, based abroad.",
-    label: "FIELD NOTES",
-    caption: "Alexandria, Egypt",
-    photo: "/quests/alexandria.jpg",
-    facts: [
-      { label: "Location", value: "Egypt" },
-      { label: "Focus", value: "Globalization" },
-      { label: "Format", value: "Coursework + fieldwork" },
-      { label: "Duration", value: "—" },
-    ],
-  },
-  {
-    status: "Completed",
-    date: "2022",
-    title: "Taste of Tippecanoe — Projection Mapping",
-    domain: "Light",
-    body: "Generative art and 3D models projected onto the Lafayette County Courthouse for a festival audience of 35,000+.",
-    label: "COURTHOUSE MAPPING",
-    caption: "Lafayette County Courthouse",
-    links: [
-      { label: "\"Courthouse to be transformed for the arts\" — Purdue Exponent", href: "https://www.purdueexponent.org/city_state/courthouse-to-be-transformed-for-the-arts/article_efe7d104-ed8a-11ec-b80e-9b1b0f5c3f28.html", type: "press" },
-      { label: "Light show video — Purdue Exponent", href: "https://www.purdueexponent.org/city_state/6-18-22-taste-of-tippecanoe-light-show/video_4aa5065e-f0a9-11ec-b444-5f7aa794071e.html", type: "press" },
-      { label: "3D model — Sketchfab", href: "https://sketchfab.com/3d-models/tippecanoe-county-courthouse-fdc8a0a85c12419fb210015df0faa03b", type: "process" },
-      { label: "Projection mapping documentation — YouTube", href: "https://www.youtube.com/watch?v=-_CBYaIbPRE", type: "process" },
-    ],
-    photo: "/quests/taste-of-tippecanoe.jpg",
-    facts: [
-      { label: "Venue", value: "Lafayette County Courthouse" },
-      { label: "Attendance", value: "35,000+" },
-      { label: "Projectors", value: "Two 30,000-lumen projectors" },
-      { label: "Medium", value: "Generative art / 3D models" },
-    ],
-  },
-  {
+    slug: "open-house",
     status: "Completed",
     date: "2026",
     title: "Open House — Projection Mapping",
     domain: "Light",
     body: "Interactive projector mapping installation for a music non-profit and instrument library fundraiser.",
-    label: "OPEN HOUSE",
-    caption: "Open House installation",
-    photo: "/quests/open-house.jpg",
-    facts: [
-      { label: "Attendance", value: "300+" },
-      { label: "Mappings", value: "3 separate mappings" },
-      { label: "Visuals", value: "5 generative visuals" },
-      { label: "Purpose", value: "Music non-profit fundraiser" },
-    ],
   },
   {
+    slug: "printmaking",
+    status: "Completed",
+    date: "2023",
+    title: "Printmaking on an 18th century printing press",
+    domain: "Craft",
+    body: "Set type by hand and pulled prints on a centuries-old letterpress.",
+  },
+  {
+    slug: "egypt",
+    status: "Completed",
+    date: "2023",
+    title: "Studying globalization in Egypt",
+    domain: "Field",
+    body: "Coursework and fieldwork on globalization, based abroad.",
+  },
+  {
+    slug: "wavash",
     status: "Completed",
     date: "2023",
     title: "WA/VASH",
     domain: "Light",
     body: "Projection-mapped visuals performed at WA/VASH (Wabash Audiovisual), an outdoor AV festival at Tapawingo Park in West Lafayette, IN, curated by Esteban García Bravo and presented by West Lafayette Parks and Recreation and the Arts Federation.",
-    label: "PROJECT NOTES",
-    caption: "Tapawingo Park, West Lafayette, IN",
+    links: [{ label: "Project page — sesseka.com", href: "https://www.sesseka.com/projects/wavash" }],
+  },
+  {
+    slug: "tippecanoe",
+    status: "Completed",
+    date: "2022",
+    title: "Taste of Tippecanoe — Projection Mapping",
+    domain: "Light",
+    body: "Generative art and 3D models projected onto the Lafayette County Courthouse for a festival audience of 35,000+.",
     links: [
-      { label: "Project page — sesseka.com", href: "https://www.sesseka.com/projects/wavash", type: "process" },
-    ],
-    photo: "/quests/wavash-web.jpg",
-    facts: [
-      { label: "Venue", value: "Tapawingo Park, West Lafayette, IN" },
-      { label: "Festival", value: "WA/VASH (Wabash Audiovisual)" },
-      { label: "Curator", value: "Esteban García Bravo" },
-      { label: "Presented by", value: "West Lafayette Parks and Recreation / the Arts Federation" },
+      { label: "Purdue Exponent — press", href: "https://www.purdueexponent.org/city_state/courthouse-to-be-transformed-for-the-arts/article_efe7d104-ed8a-11ec-b80e-9b1b0f5c3f28.html" },
+      { label: "Light show video", href: "https://www.purdueexponent.org/city_state/6-18-22-taste-of-tippecanoe-light-show/video_4aa5065e-f0a9-11ec-b444-5f7aa794071e.html" },
+      { label: "3D model — Sketchfab", href: "https://sketchfab.com/3d-models/tippecanoe-county-courthouse-fdc8a0a85c12419fb210015df0faa03b" },
+      { label: "Documentation — YouTube", href: "https://www.youtube.com/watch?v=-_CBYaIbPRE" },
     ],
   },
+  {
+    slug: "pilot",
+    status: "Paused",
+    date: "2020–21",
+    title: "Student pilot",
+    domain: "Aviation",
+    body: "Learned to fly a Piper Warrior II in my Indiana hometown. I love planes, and this was a dream opportunity during late high school and early college.",
+  },
 ];
-
-export const quests = [...questsData].sort(
-  (a, b) => dateSortValue(b.date) - dateSortValue(a.date)
-);
