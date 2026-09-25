@@ -6,7 +6,6 @@ import { PixelHeadshot } from "./PixelHeadshot";
 import { HeroHeadline } from "./HeroHeadline";
 import { AboutStatement } from "./AboutStatement";
 import { Reveal } from "./Reveal";
-import { KeywordDecode } from "./KeywordDecode";
 import { SpinIcon } from "./SpinIcon";
 import { Preloader } from "./Preloader";
 import { ProjectOverlay } from "./ProjectOverlay";
@@ -324,7 +323,7 @@ function WorkSection({
         <div className="work-v2-body">
           <Reveal as="div" className="work-v2-heading">
             <h2 className="work-v2-h2">
-              Work <span className="kw-taupe">(<KeywordDecode text={pad(visibleProjects.length)} />)</span>
+              Work <span className="kw-taupe">({pad(visibleProjects.length)})</span>
             </h2>
             <div className="pill-filter">
               {filterOptions.map((option) => (
@@ -347,6 +346,7 @@ function WorkSection({
                   role="button"
                   tabIndex={0}
                   className="work-v2-row"
+                  aria-label={`View case study: ${project.title}`}
                   onClick={() => onOpen(project.slug)}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(project.slug); } }}
                   onMouseEnter={() => setHover(project.slug)}
@@ -358,7 +358,7 @@ function WorkSection({
                     <span className="work-v2-org">{project.org} &middot; {project.track}</span>
                   </span>
                   <span className="work-v2-desc">{project.description}</span>
-                  <span className={`work-v2-impact${hover === project.slug ? " is-hover" : ""}`}>{project.impact}</span>
+                  <span className={`work-v2-arrow${hover === project.slug ? " is-hover" : ""}`} aria-hidden="true">&#8599;</span>
                 </div>
               </Reveal>
             ))}
@@ -383,21 +383,24 @@ function AboutChapter() {
     const easeInOutCubic = (u: number) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
     const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 
+    const render = (p: number) => {
+      const u = clamp((p - 0.05) / 0.8);
+      const e = easeInOutCubic(u);
+      const iy = 38 * (1 - e);
+      const ix = 40 * (1 - e);
+      gsap.set(panel, { clipPath: `inset(${iy}% ${ix}% ${iy}% ${ix}% round ${28 * (1 - e)}px)` });
+      gsap.set(label, { scale: 0.55 + 0.45 * e, opacity: 1 - clamp((p - 0.9) / 0.1) });
+    };
+
     const trigger = ScrollTrigger.create({
       trigger: wrap,
       start: "top top",
       end: () => `+=${wrap.offsetHeight - window.innerHeight}`,
       pin: false,
-      onUpdate: (self) => {
-        const p = self.progress;
-        const u = clamp((p - 0.05) / 0.8);
-        const e = easeInOutCubic(u);
-        const iy = 38 * (1 - e);
-        const ix = 40 * (1 - e);
-        gsap.set(panel, { clipPath: `inset(${iy}% ${ix}% ${iy}% ${ix}% round ${28 * (1 - e)}px)` });
-        gsap.set(label, { scale: 0.55 + 0.45 * e, opacity: 1 - clamp((p - 0.9) / 0.1) });
-      },
+      onUpdate: (self) => render(self.progress),
     });
+    // Apply the starting frame immediately so the label never shows at full size before the first scroll update.
+    render(trigger.progress);
 
     return () => trigger.kill();
   }, []);
@@ -418,7 +421,7 @@ function AboutChapter() {
 
 function AboutSection() {
   return (
-    <section className="section-v2" id="about">
+    <section className="section-v2 about-v2" id="about">
       <ChapterRow n="03" label="About" icon="flower" k={1.2} as="h2" />
 
       <div className="about-v2-grid">
@@ -468,7 +471,23 @@ function QuestsSection() {
       }
     );
 
+    // Recalculate the scroll distance once each photo has loaded and the track has its real width.
+    // Each card is sized from its photo's aspect ratio so vertical photos get a narrower column.
+    const images = Array.from(track.querySelectorAll("img"));
+    const onLoad = (img: HTMLImageElement) => {
+      if (!img.naturalWidth) return;
+      img.closest<HTMLElement>(".quest-v2-item")?.style.setProperty("--ar", String(img.naturalWidth / img.naturalHeight));
+      ScrollTrigger.refresh();
+    };
+    const handlers = images.map((img) => {
+      const handler = () => onLoad(img);
+      img.addEventListener("load", handler);
+      if (img.complete) onLoad(img);
+      return handler;
+    });
+
     return () => {
+      images.forEach((img, i) => img.removeEventListener("load", handlers[i]));
       tween.scrollTrigger?.kill();
       tween.kill();
     };
@@ -497,7 +516,7 @@ function QuestsSection() {
                   <SpinIcon icon={QUEST_ICONS[index % 4]} k={index % 2 ? -1.3 : 1.3} />
                 </span>
               </div>
-              <img className="quest-v2-photo" src={`/assets/quests/${quest.slug}.jpg`} alt={quest.title} loading="lazy" />
+              <img className="quest-v2-photo" src={`/assets/quests/${quest.slug}.jpg`} alt={quest.title} />
               <div className="quest-v2-copy">
                 <span className="quest-v2-domain">{quest.domain} &mdash; {quest.status}</span>
                 <h3>{quest.title}</h3>
@@ -556,7 +575,7 @@ function ContactSection({ copied, onCopy }: { copied: boolean; onCopy: () => voi
         <div />
         <div className="contact-v2-body">
           <Reveal as="h2" className="contact-v2-h2">
-            Currently open to <span className="kw-nowrap"><KeywordDecode text="product design" /></span> and front-end engineering roles.
+            Currently open to <span className="kw-nowrap">product design</span> and front-end engineering roles.
           </Reveal>
           <div className="contact-v2-grid">
             <Reveal as="div" className="contact-v2-direct">
