@@ -46,7 +46,7 @@ export function Preloader() {
   return (
     <div className={`preloader${closing ? " preloader-closing" : ""}`} aria-hidden={closing}>
       <div className="preloader-row">
-        <span>CRLNA</span>
+        <span className="preloader-brand">CRLNA</span>
         <span>Strategy + Design in critical spaces</span>
       </div>
       <div className="preloader-row preloader-row-bottom">

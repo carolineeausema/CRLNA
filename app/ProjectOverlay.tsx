@@ -45,6 +45,20 @@ export function ProjectOverlay({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // Lock background scroll while open; pad for the vanished scrollbar to avoid layout shift.
+  useEffect(() => {
+    if (!open) return;
+    const root = document.documentElement;
+    const scrollbarWidth = window.innerWidth - root.clientWidth;
+    const prev = { overflow: root.style.overflow, paddingRight: document.body.style.paddingRight };
+    root.style.overflow = "hidden";
+    if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
+    return () => {
+      root.style.overflow = prev.overflow;
+      document.body.style.paddingRight = prev.paddingRight;
+    };
+  }, [open]);
+
   useEffect(() => {
     const backdrop = backdropRef.current;
     const panel = panelRef.current;

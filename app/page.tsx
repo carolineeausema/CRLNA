@@ -9,7 +9,7 @@ import { Reveal } from "./Reveal";
 import { SpinIcon } from "./SpinIcon";
 import { Preloader } from "./Preloader";
 import { ProjectOverlay } from "./ProjectOverlay";
-import { availability, projects, quests, type Track } from "./data";
+import { availability, projects, quests } from "./data";
 
 const navigation = [
   { id: "work", label: "Work", href: "#work" },
@@ -20,25 +20,20 @@ const navigation = [
 
 const sectionIds = ["work", "about", "quests", "contact"];
 
-type Filter = "All" | Track | "Creative";
-const filterOptions: Filter[] = ["All", "Engineering", "Design", "Creative"];
-
 const QUEST_ICONS = ["circle", "flower", "singer", "tulip"] as const;
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
 export default function Home() {
-  const [filter, setFilter] = useState<Filter>("All");
   const [selSlug, setSelSlug] = useState<string | null>(null);
   const [pastHero, setPastHero] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const [nearFooter, setNearFooter] = useState(false);
+  const [navTucked, setNavTucked] = useState(false);
   const [copied, setCopied] = useState(false);
   const ringRef = useRef<SVGCircleElement>(null);
   const backToTopRef = useRef<HTMLButtonElement>(null);
-  const floatCardRef = useRef<HTMLAnchorElement>(null);
 
-  const visibleProjects = filter === "All" ? projects : projects.filter((project) => project.track === filter);
   const selIndex = selSlug ? projects.findIndex((project) => project.slug === selSlug) : -1;
   const selProject = selIndex >= 0 ? projects[selIndex] : null;
   const nextProject = projects[(Math.max(selIndex, 0) + 1) % projects.length];
@@ -52,10 +47,18 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    let lastY = window.scrollY;
     const onScroll = () => {
       const vh = window.innerHeight;
       const y = window.scrollY;
       setPastHero(y > vh * 0.8);
+
+      // Hide nav on scroll down, show on scroll up; always shown in the top half of the hero.
+      // The ±4px buffer stops it flickering on small movements.
+      const delta = y - lastY;
+      if (y < vh * 0.5 || delta < -4) setNavTucked(false);
+      else if (delta > 4) setNavTucked(true);
+      lastY = y;
 
       let current: string | null = null;
       for (const id of sectionIds) {
@@ -92,29 +95,19 @@ export default function Home() {
 
   useEffect(() => {
     const backToTopVisible = pastHero && !selSlug;
-    const floatCardVisible = pastHero && !selSlug && active !== "contact";
     const ctx = gsap.context(() => {
       if (backToTopRef.current) {
         gsap.to(backToTopRef.current, {
           opacity: backToTopVisible ? 1 : 0,
           y: backToTopVisible ? 0 : 20,
-          duration: 0.35,
+          duration: 0.45,
           ease: "power2.out",
           pointerEvents: backToTopVisible ? "auto" : "none",
         });
       }
-      if (floatCardRef.current) {
-        gsap.to(floatCardRef.current, {
-          opacity: floatCardVisible ? 1 : 0,
-          y: floatCardVisible ? 0 : 20,
-          duration: 0.35,
-          ease: "power2.out",
-          pointerEvents: floatCardVisible ? "auto" : "none",
-        });
-      }
     });
     return () => ctx.revert();
-  }, [pastHero, selSlug, active]);
+  }, [pastHero, selSlug]);
 
   const openProject = (slug: string) => setSelSlug(slug);
   const closeProject = () => setSelSlug(null);
@@ -126,21 +119,13 @@ export default function Home() {
     setTimeout(() => setCopied(false), 1800);
   };
 
-  const pickFilter = (f: Filter) => {
-    if (f === "Creative") {
-      document.getElementById("quests")?.scrollIntoView({ behavior: "smooth" });
-      return;
-    }
-    setFilter(f);
-  };
-
   return (
     <>
       <a href="#main" className="skip-link">Skip to content</a>
 
       <Preloader />
 
-      <SiteHeader active={active} visible={!nearFooter} />
+      <SiteHeader active={active} visible={!nearFooter} tucked={navTucked} />
 
       <button
         type="button"
@@ -162,24 +147,10 @@ export default function Home() {
         <span>&uarr;</span>
       </button>
 
-      <a
-        href="#contact"
-        ref={floatCardRef}
-        className="float-card"
-        onMouseEnter={(event) => gsap.to(event.currentTarget, { y: -4, duration: 0.35, ease: "power2.out" })}
-        onMouseLeave={(event) => gsap.to(event.currentTarget, { y: 0, duration: 0.35, ease: "power2.out" })}
-      >
-        <span className="float-card-left">
-          <span className="float-card-copy">Open to<br />new roles</span>
-          <span className="float-card-say">Say hello &darr;</span>
-        </span>
-        <span className="float-card-hi">hi</span>
-      </a>
-
       <Hero />
 
       <main id="main" tabIndex={-1}>
-        <WorkSection filter={filter} projects={visibleProjects} onFilterChange={pickFilter} onOpen={openProject} />
+        <WorkSection onOpen={openProject} />
 
         <AboutChapter />
         <AboutSection />
@@ -209,7 +180,7 @@ function ChapterRow({ n, label, icon, k = 1.2, as = "span" }: { n: string; label
   );
 }
 
-function SiteHeader({ active, visible }: { active: string | null; visible: boolean }) {
+function SiteHeader({ active, visible, tucked }: { active: string | null; visible: boolean; tucked: boolean }) {
   const gooRefs = useRef<Record<string, HTMLSpanElement | null>>({});
   const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
 
@@ -231,7 +202,7 @@ function SiteHeader({ active, visible }: { active: string | null; visible: boole
   }, [active]);
 
   return (
-    <nav className={`site-header-v2${visible ? "" : " is-hidden"}`} aria-label="Primary">
+    <nav className={`site-header-v2${visible ? "" : " is-hidden"}${tucked ? " is-tucked" : ""}`} aria-label="Primary">
       <a className="brand-v2" href="#top">CRLNA</a>
       <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true">
         <defs>
@@ -301,17 +272,7 @@ function Hero() {
   );
 }
 
-function WorkSection({
-  filter,
-  projects: visibleProjects,
-  onFilterChange,
-  onOpen,
-}: {
-  filter: Filter;
-  projects: typeof projects;
-  onFilterChange: (filter: Filter) => void;
-  onOpen: (slug: string) => void;
-}) {
+function WorkSection({ onOpen }: { onOpen: (slug: string) => void }) {
   const [hover, setHover] = useState<string | null>(null);
 
   return (
@@ -323,24 +284,12 @@ function WorkSection({
         <div className="work-v2-body">
           <Reveal as="div" className="work-v2-heading">
             <h2 className="work-v2-h2">
-              Work <span className="kw-taupe">({pad(visibleProjects.length)})</span>
+              Work <span className="kw-taupe">({pad(projects.length)})</span>
             </h2>
-            <div className="pill-filter">
-              {filterOptions.map((option) => (
-                <button
-                  key={option}
-                  className={`pill-filter-btn${filter === option ? " is-active" : ""}`}
-                  onClick={() => onFilterChange(option)}
-                  type="button"
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
           </Reveal>
 
           <div className="work-v2-list" onMouseLeave={() => setHover(null)}>
-            {visibleProjects.map((project) => (
+            {projects.map((project) => (
               <Reveal as="div" key={project.slug}>
                 <div
                   role="button"
@@ -454,17 +403,26 @@ function QuestsSection() {
     if (!section || !track) return;
 
     const distance = () => Math.max(0, track.scrollWidth - window.innerWidth);
+    // Extra pinned scroll after the last card, so vertical scroll doesn't resume abruptly.
+    const hold = () => window.innerHeight * 0.35;
+    // Ease out so the track slows into its final card, then sits still for the hold.
+    // The split is read live so it stays right after images load or the window resizes.
+    const settle = (p: number) => {
+      const d = distance();
+      const r = d / (d + hold());
+      return p >= r ? 1 : 1 - (1 - p / r) ** 2;
+    };
     const tween = gsap.fromTo(
       track,
       { x: 0 },
       {
         x: () => -distance(),
-        ease: "none",
+        ease: settle,
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: () => "+=" + distance(),
-          scrub: true,
+          end: () => "+=" + (distance() + hold()),
+          scrub: 0.0,
           pin: true,
           invalidateOnRefresh: true,
         },
@@ -568,7 +526,7 @@ function ContactSection({ copied, onCopy }: { copied: boolean; onCopy: () => voi
   };
 
   return (
-    <section className="section-v2" id="contact">
+    <section className="section-v2 contact-v2" id="contact">
       <ChapterRow n="05" label="Contact" icon="singer" k={1.2} />
 
       <div className="section-grid section-content">
@@ -587,7 +545,7 @@ function ContactSection({ copied, onCopy }: { copied: boolean; onCopy: () => voi
               <div className="pill-filter">
                 <a className="pill-filter-btn" href="https://github.com" target="_blank" rel="noreferrer">GitHub &#8599;</a>
                 <a className="pill-filter-btn" href="https://linkedin.com" target="_blank" rel="noreferrer">LinkedIn &#8599;</a>
-                <a className="pill-filter-btn" href="#">Resume PDF &darr;</a>
+                <a className="pill-filter-btn" href="/AUSEMA_Resume.pdf" target="_blank" rel="noreferrer">Resume PDF &#8599;</a>
               </div>
               <div className="contact-v2-status"><span className="status-dot" />{availability}</div>
             </Reveal>

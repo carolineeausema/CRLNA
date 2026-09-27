@@ -52,12 +52,16 @@ img { max-width: 100%; display: block; }
 .preloader { position: fixed; inset: 0; z-index: 100; background: var(--cream); color: var(--ink); display: flex; flex-direction: column; justify-content: space-between; padding: var(--side); transition: transform 1s var(--ease-expo); }
 .preloader-closing { transform: translateY(-100%); pointer-events: none; }
 .preloader-row { display: flex; justify-content: space-between; font-size: 15px; font-weight: 500; }
+.preloader-row:first-child { align-items: baseline; }
+/* Matches .brand-v2 so the logo doesn't change size when the loader lifts. */
+.preloader-brand { font-weight: 600; font-size: 24px; letter-spacing: -.03em; }
 .preloader-row-bottom { align-items: flex-end; gap: 24px; }
 .preloader-caption { max-width: 320px; font-size: clamp(22px, 2.4vw, 34px); line-height: 1.1; }
 .preloader-counter { font-weight: 500; font-size: clamp(110px, 24vw, 360px); line-height: .8; letter-spacing: -.06em; font-variant-numeric: tabular-nums; }
 
-.site-header-v2 { position: fixed; top: 0; left: 0; right: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px var(--side); pointer-events: none; opacity: 1; transition: opacity .3s ease; }
+.site-header-v2 { position: fixed; top: 0; left: 0; right: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px var(--side); pointer-events: none; opacity: 1; transition: opacity .3s ease, transform .45s cubic-bezier(.2,.7,.2,1); }
 .site-header-v2.is-hidden { opacity: 0; }
+.site-header-v2.is-tucked { transform: translateY(-110%); }
 .site-header-v2.is-hidden .brand-v2, .site-header-v2.is-hidden .pill-nav { pointer-events: none; }
 .brand-v2 { pointer-events: auto; font-weight: 600; font-size: 24px; letter-spacing: -.03em; color: var(--ink); text-decoration: none; display: flex; align-items: baseline; gap: 2px; }
 .pill-nav { pointer-events: auto; position: relative; padding: 8px; margin: -8px; }
@@ -71,11 +75,6 @@ img { max-width: 100%; display: block; }
 .back-to-top-ring { position: absolute; inset: 0; transform: rotate(-90deg); }
 .back-to-top span { font-size: 18px; font-weight: 600; position: relative; }
 
-.float-card { position: fixed; right: clamp(12px, 2vw, 24px); bottom: clamp(12px, 2vw, 24px); z-index: 30; background: var(--paper); border-radius: 14px; padding: 14px 14px 14px 20px; display: flex; gap: 20px; align-items: stretch; text-decoration: none; color: var(--ink); box-shadow: 0 10px 30px rgba(55, 38, 33, .18); opacity: 0; pointer-events: none; }
-.float-card-left { display: flex; flex-direction: column; justify-content: space-between; gap: 18px; }
-.float-card-copy { font-size: 19px; line-height: 1.15; font-weight: 500; }
-.float-card-say { font-size: 13px; font-weight: 500; }
-.float-card-hi { width: 64px; border-radius: 8px; background: var(--sage); display: flex; align-items: flex-end; padding: 8px; color: var(--cream); font-size: 26px; line-height: .9; }
 
 .hero-v2 { position: relative; height: 100vh; min-height: 640px; overflow: hidden; background: var(--cream); color: var(--ink); }
 .hero-headshot-wrap { position: absolute; right: clamp(0px, 3vw, 60px); bottom: 0; height: min(90vh, 58vw); aspect-ratio: 1242 / 1643; max-width: 44vw; pointer-events: none; }
@@ -160,6 +159,8 @@ img { max-width: 100%; display: block; }
 .quest-v2-links { display: flex; flex-wrap: wrap; gap: 4px 16px; padding-top: 4px; }
 .quest-v2-links a { display: inline-flex; align-items: center; min-height: 24px; font-size: 13px; font-weight: 500; color: var(--ink); text-underline-offset: 3px; }
 
+/* Extra room after the pinned side quests, fading from their paper background into cream. */
+.contact-v2 { padding-top: calc(var(--section-pad) + clamp(64px, 12vh, 160px)); background: linear-gradient(to bottom, var(--paper), var(--cream) 90vh); }
 .contact-v2-body { display: flex; flex-direction: column; gap: 56px; }
 .contact-v2-h2 { font-family: var(--font-headline); font-weight: 500; font-size: clamp(38px, 5vw, 84px); letter-spacing: -.04em; max-width: 1000px; text-wrap: pretty; line-height: 1.12; }
 .contact-v2-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(32px, 5vw, 80px); }
@@ -190,7 +191,7 @@ img { max-width: 100%; display: block; }
 
 .overlay-backdrop { position: fixed; inset: 0; z-index: 55; background: rgba(40, 28, 24, .5); opacity: 0; pointer-events: none; transition: opacity .6s; }
 .overlay-backdrop[aria-hidden="false"] { pointer-events: auto; }
-.overlay-panel { position: fixed; left: 0; right: 0; top: 12px; bottom: 0; z-index: 60; background: var(--cream); border-radius: 24px 24px 0 0; overflow-y: auto; box-shadow: 0 -10px 40px rgba(40, 28, 24, .2); visibility: hidden; }
+.overlay-panel { position: fixed; left: 0; right: 0; top: 12px; bottom: 0; z-index: 60; background: var(--cream); border-radius: 24px 24px 0 0; overflow-y: auto; overscroll-behavior: contain; box-shadow: 0 -10px 40px rgba(40, 28, 24, .2); visibility: hidden; }
 .overlay-topbar { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px var(--side); background: var(--cream); border-bottom: 1px solid rgba(55, 38, 33, .15); }
 .overlay-eyebrow { font-size: 13px; font-weight: 500; color: var(--muted); }
 .overlay-topbar-actions { display: flex; gap: 8px; }
@@ -248,7 +249,7 @@ img { max-width: 100%; display: block; }
 
 @media (max-width: 680px) {
   .site-header-v2 { padding: 12px; gap: 8px; }
-  .brand-v2 { font-size: 18px; }
+  .brand-v2, .preloader-brand { font-size: 18px; }
   .pill-nav-goo, .pill-nav-links { gap: 2px; }
   .pill-nav-goo-pill, .pill-nav-link { padding: 8px; font-size: 9px; gap: 3px; }
   .work-v2-row { grid-template-columns: 40px minmax(0, 1fr) auto; align-items: start; }

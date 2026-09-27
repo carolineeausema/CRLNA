@@ -82,7 +82,6 @@ const MEDIA: Record<string, MediaItem[]> = {
     },
   ],
   "federal-account": [
-    { img: "/work/fed-01-dashboard.png", caption: "Illustrative account dashboard" },
     {
       code: `flowchart LR
     A[Business owner needs tax info] --> B{Old process}
@@ -125,7 +124,7 @@ const MEDIA: Record<string, MediaItem[]> = {
     end`,
       caption: "Transaction logic by entity type (my focus area)",
     },
-    { img: "/work/fed-02-architecture.png", caption: "Illustrative architecture" },
+    { img: "/work/fed-01-dashboard.png", caption: "Illustrative account dashboard" },
   ],
   pathfinder: [
     { img: "/work/pathfinder-01-overview.png", caption: "Illustrative compliance overview" },
@@ -194,7 +193,7 @@ const projectsBase: Omit<Project, "media">[] = [
     stat: "36M+",
     role: "Systems Engineer",
     team: "Deloitte, Architecture Design team",
-    problem: "A notoriously opaque government process had to become something a small business owner could actually use without help.",
+    problem: "A notoriously opaque government process had to become something a small business owner could use without help.",
     work: "I designed and documented client releases through user flows, sequence diagrams, API specifications, and architecture diagrams. I mapped the logic behind different transaction types, like generating and confirming PINs, across business entity categories such as partnerships, exempt organizations, and government entities, each pulling from its own API, and used return codes to trace what had actually happened in a transaction when something failed. I also facilitated team meetings and wrote weekly, biweekly, and monthly status reports to keep a program of thousands of practitioners aligned with stakeholder reporting requirements.",
     different: "The gap between what was compliant and what was actually usable didn't show up until later than it should have. That kind of gap is easier to notice from outside the room than from inside the discussions I was documenting. Earlier user testing with actual small business owners, not just internal stakeholders, would have caught it sooner.",
     confidentialityNote: "Built under federal client confidentiality. Shown here through description and illustrative diagrams, not the actual interface or government systems involved.",
