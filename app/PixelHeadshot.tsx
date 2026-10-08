@@ -18,6 +18,12 @@ export function PixelHeadshot() {
     const img = new Image();
     let lastBlock = -1;
     const progress = { p: 0 };
+    // Horizontal placement inside the canvas: 0.5 centres (desktop), 1 pins right (set via CSS on phones).
+    let align = 0.5;
+    const readAlign = () => {
+      const value = parseFloat(getComputedStyle(canvas).getPropertyValue("--portrait-align"));
+      align = Number.isFinite(value) ? value : 0.5;
+    };
     const off = document.createElement("canvas");
     const offCtx = off.getContext("2d");
 
@@ -45,7 +51,7 @@ export function PixelHeadshot() {
         drawHeight = height;
         drawWidth = height * ratio;
       }
-      const dx = (width - drawWidth) / 2;
+      const dx = (width - drawWidth) * align;
       const dy = height - drawHeight;
 
       if (quantized < 0.02) {
@@ -89,7 +95,9 @@ export function PixelHeadshot() {
       },
     });
 
+    readAlign();
     const resizeObserver = new ResizeObserver(() => {
+      readAlign();
       lastBlock = -1;
       drawPix(progress.p);
     });

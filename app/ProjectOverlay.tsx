@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { gsap } from "./lib/gsap";
 import { MermaidDiagram } from "./MermaidDiagram";
+import { FigureLightbox, type LightboxFigure } from "./FigureLightbox";
 import type { Project } from "./data";
 
 function withInlineLinks(text: string) {
@@ -31,6 +32,20 @@ export function ProjectOverlay({
   const open = !!project;
   const backdropRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = useState<LightboxFigure | null>(null);
+  const closeFigure = useCallback(() => setExpanded(null), []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setExpanded(null);
+  }, [project]);
+
+  const expandFigure = (button: HTMLButtonElement, label: string, caption: string, src?: string) => {
+    // Diagrams are rendered client-side by Mermaid, so the viewer reuses the SVG already on the page.
+    const svgMarkup = src ? undefined : button.querySelector("svg")?.outerHTML;
+    if (!src && !svgMarkup) return;
+    setExpanded({ label, caption, src, svgMarkup });
+  };
 
   useEffect(() => {
     if (panelRef.current) gsap.set(panelRef.current, { yPercent: 105 });
@@ -129,20 +144,36 @@ export function ProjectOverlay({
                 </div>
               ) : (
                 <div className="overlay-figures">
-                  {project.media?.map((item, i) => (
-                    <figure
-                      key={item.caption + i}
-                      className="overlay-figure"
-                      style={{ maxWidth: item.photo ? "560px" : "100%" }}
-                    >
-                      {item.img && <img src={item.img} alt={item.caption} loading="lazy" />}
-                      {item.code && <MermaidDiagram chart={item.code} />}
-                      <figcaption>
-                        <span className="overlay-figure-n">Fig. {String(i + 1).padStart(2, "0")}</span>
-                        <span>{item.caption}</span>
-                      </figcaption>
-                    </figure>
-                  ))}
+                  {project.media?.map((item, i) => {
+                    const label = `Fig. ${String(i + 1).padStart(2, "0")}`;
+                    return (
+                      <figure
+                        key={item.caption + i}
+                        className="overlay-figure"
+                        style={{ maxWidth: item.photo ? "560px" : "100%" }}
+                      >
+                        <button
+                          type="button"
+                          className="figure-expand"
+                          aria-label={`Expand ${label}: ${item.caption}`}
+                          onClick={(event) => expandFigure(event.currentTarget, label, item.caption, item.img)}
+                        >
+                          {item.img && <img src={item.img} alt={item.caption} loading="lazy" />}
+                          {item.code && <MermaidDiagram chart={item.code} />}
+                          <span className="figure-expand-badge" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+                              <path d="M8.5 1.5h4v4M12.5 1.5 8 6M5.5 12.5h-4v-4M1.5 12.5 6 8" />
+                            </svg>
+                            Expand
+                          </span>
+                        </button>
+                        <figcaption>
+                          <span className="overlay-figure-n">{label}</span>
+                          <span>{item.caption}</span>
+                        </figcaption>
+                      </figure>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -192,6 +223,7 @@ export function ProjectOverlay({
           </>
         )}
       </div>
+      <FigureLightbox figure={expanded} onClose={closeFigure} />
     </>
   );
 }

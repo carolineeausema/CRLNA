@@ -14,7 +14,7 @@ import { availability, projects, quests } from "./data";
 const navigation = [
   { id: "work", label: "Work", href: "#work" },
   { id: "about", label: "About", href: "#about" },
-  { id: "quests", label: "Side quests", href: "#quests" },
+  { id: "quests", label: "Side quests", short: "Quests", href: "#quests" },
   { id: "contact", label: "Contact", href: "#contact" },
 ];
 
@@ -185,20 +185,24 @@ function SiteHeader({ active, visible, tucked }: { active: string | null; visibl
   const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
+    const mm = gsap.matchMedia();
+    // Tighter pills on phones so all four links fit beside the brand.
+    mm.add({ tiny: "(max-width: 359px)", narrow: "(max-width: 680px)" }, (context) => {
+      const { tiny, narrow } = context.conditions ?? {};
+      const [rest, grown] = tiny ? [7, 11] : narrow ? [10, 16] : [16, 30];
       navigation.forEach((item) => {
         const isActive = item.id === active;
         const targets = [gooRefs.current[item.id], linkRefs.current[item.id]].filter(Boolean);
         if (!targets.length) return;
         gsap.to(targets, {
-          paddingLeft: isActive ? 30 : 16,
-          paddingRight: isActive ? 30 : 16,
+          paddingLeft: isActive ? grown : rest,
+          paddingRight: isActive ? grown : rest,
           duration: 0.7,
           ease: "NAV",
         });
       });
     });
-    return () => ctx.revert();
+    return () => mm.revert();
   }, [active]);
 
   return (
@@ -220,7 +224,7 @@ function SiteHeader({ active, visible, tucked }: { active: string | null; visibl
               ref={(el) => { gooRefs.current[item.id] = el; }}
               className="pill-nav-goo-pill"
             >
-              {item.label}
+              <NavLabel item={item} />
             </span>
           ))}
         </div>
@@ -233,12 +237,22 @@ function SiteHeader({ active, visible, tucked }: { active: string | null; visibl
               aria-current={item.id === active ? "true" : "false"}
               className="pill-nav-link"
             >
-              {item.label}
+              <NavLabel item={item} />
             </a>
           ))}
         </div>
       </div>
     </nav>
+  );
+}
+
+function NavLabel({ item }: { item: (typeof navigation)[number] }) {
+  if (!item.short) return <>{item.label}</>;
+  return (
+    <>
+      <span className="nav-label-full">{item.label}</span>
+      <span className="nav-label-short">{item.short}</span>
+    </>
   );
 }
 
@@ -402,32 +416,36 @@ function QuestsSection() {
     const track = trackRef.current;
     if (!section || !track) return;
 
-    const distance = () => Math.max(0, track.scrollWidth - window.innerWidth);
-    // Extra pinned scroll after the last card, so vertical scroll doesn't resume abruptly.
-    const hold = () => window.innerHeight * 0.35;
-    // Ease out so the track slows into its final card, then sits still for the hold.
-    // The split is read live so it stays right after images load or the window resizes.
-    const settle = (p: number) => {
-      const d = distance();
-      const r = d / (d + hold());
-      return p >= r ? 1 : 1 - (1 - p / r) ** 2;
-    };
-    const tween = gsap.fromTo(
-      track,
-      { x: 0 },
-      {
-        x: () => -distance(),
-        ease: settle,
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: () => "+=" + (distance() + hold()),
-          scrub: 0.0,
-          pin: true,
-          invalidateOnRefresh: true,
-        },
-      }
-    );
+    // Phones get a native swipe carousel (see .quests-v2 in globals.css); the pinned scroll is desktop-only.
+    const mm = gsap.matchMedia();
+    mm.add("(min-width: 681px)", () => {
+      const distance = () => Math.max(0, track.scrollWidth - window.innerWidth);
+      // Extra pinned scroll after the last card, so vertical scroll doesn't resume abruptly.
+      const hold = () => window.innerHeight * 0.35;
+      // Ease out so the track slows into its final card, then sits still for the hold.
+      // The split is read live so it stays right after images load or the window resizes.
+      const settle = (p: number) => {
+        const d = distance();
+        const r = d / (d + hold());
+        return p >= r ? 1 : 1 - (1 - p / r) ** 2;
+      };
+      gsap.fromTo(
+        track,
+        { x: 0 },
+        {
+          x: () => -distance(),
+          ease: settle,
+          scrollTrigger: {
+            trigger: section,
+            start: "top top",
+            end: () => "+=" + (distance() + hold()),
+            scrub: 0.0,
+            pin: true,
+            invalidateOnRefresh: true,
+          },
+        }
+      );
+    });
 
     // Recalculate the scroll distance once each photo has loaded and the track has its real width.
     // Each card is sized from its photo's aspect ratio so vertical photos get a narrower column.
@@ -446,8 +464,7 @@ function QuestsSection() {
 
     return () => {
       images.forEach((img, i) => img.removeEventListener("load", handlers[i]));
-      tween.scrollTrigger?.kill();
-      tween.kill();
+      mm.revert();
     };
   }, []);
 
@@ -462,7 +479,10 @@ function QuestsSection() {
             </span>
             <h2 className="quests-v2-h2">Side <span className="kw-sage">quests</span></h2>
           </div>
-          <span className="quests-v2-hint">Keep scrolling &rarr;</span>
+          <span className="quests-v2-hint">
+            <span className="hint-scroll">Keep scrolling</span>
+            <span className="hint-swipe">Swipe</span> &rarr;
+          </span>
         </div>
         <div className="quests-v2-track" ref={trackRef}>
           {quests.map((quest, index) => (
